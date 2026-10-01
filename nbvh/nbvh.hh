@@ -341,6 +341,59 @@ inline bool query(
   return hit;
 }
 
+template <class BvhT, class DistFuncT, typename DistanceT, class Iter>
+inline DistanceT nearest(
+  const BvhT &bvh,
+  DistFuncT &func,
+  DistanceT mind,
+  const Iter &base)
+{
+  const auto &nodes = bvh.nodes(); if (nodes.empty())
+    return std::numeric_limits<DistanceT>::max();
+
+  struct SE { typename BvhT::index_type i; DistanceT d; };
+  std::stack<SE> se({SE { 0, func(nodes.front().b) }});
+
+  while (!si.empty())
+  {
+    const auto entry = se.top(); se.pop();
+    const auto &node = nodes[entry.i];
+    if (entry.d >= mind) continue;
+    
+    if (node.leaf())
+    {
+      const auto ib = node.offset();
+      const auto ie = ib + node.length();
+
+      for (auto i = ib; i < ie; ++i)
+      {
+        const auto d = func(*(base + i));
+        if (mind > d) { mind = d; }
+      }
+    }
+    else
+    {
+      const auto left = node.left();
+      const auto right = node.right();
+      const auto dl = func(nodes[left].b);
+      const auto dr = func(nodes[right].b);
+
+      if (dl > dr)
+      {
+        se.push({ left, dl });
+        se.push({ right, dr });
+      }
+      else
+      {
+        se.push({ right, dr });
+        se.push({ left, dl });
+      }
+    }
+  }
+
+  return mind;
+}
+
 template <class BvhT, class CollideT, class VecT, typename DistanceT, class Iter>
 inline bool intersect(
   const BvhT &bvh,
