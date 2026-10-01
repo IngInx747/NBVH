@@ -144,6 +144,10 @@ template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
 inline T volume(const Aabb<T, N> &b)
 { return op_impl_rdc<T, N>(diagonal(b), [] (T x, T y) { return x*y; }, (T)1, Indices{}); }
 
+template <typename T, size_t N>
+inline VectorN<T, N> nearest(const Aabb<T, N> &b, const VectorN<T, N> &v)
+{ return max(b[0], min(b[1], v)); }
+
 ////////////////////////////////////////////////////////////////
 /// AABB operation impls
 ////////////////////////////////////////////////////////////////
