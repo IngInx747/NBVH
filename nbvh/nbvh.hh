@@ -348,11 +348,14 @@ inline DistanceT nearest(
   DistanceT mind,
   const Iter &base)
 {
-  const auto &nodes = bvh.nodes(); if (nodes.empty())
-    return std::numeric_limits<DistanceT>::max();
+  constexpr auto kInf = std::numeric_limits<DistanceT>::max();
 
+  const auto &nodes = bvh.nodes();
+  if (nodes.empty()) return kInf;
+
+  bool hit {};
   struct SE { typename BvhT::index_type i; DistanceT d; };
-  std::stack<SE> se({SE { 0, func(nodes.front().b) }});
+  std::stack<SE> se({ SE { 0, func(nodes.front().b) } });
 
   while (!se.empty())
   {
@@ -368,7 +371,7 @@ inline DistanceT nearest(
       for (auto i = ib; i < ie; ++i)
       {
         const auto d = func(*(base + i));
-        if (mind > d) { mind = d; }
+        if (mind > d) { mind = d; hit = true; }
       }
     }
     else
@@ -391,7 +394,7 @@ inline DistanceT nearest(
     }
   }
 
-  return mind;
+  return hit ? mind : kInf;
 }
 
 template <class BvhT, class CollideT, class VecT, typename DistanceT, class Iter>
@@ -446,7 +449,7 @@ inline bool intersect(
 }
 
 ////////////////////////////////////////////////////////////////
-/// Bvh definition example
+/// Bvh functor templates
 ////////////////////////////////////////////////////////////////
 
 /// Bounding box Interfaces:
@@ -485,16 +488,13 @@ inline bool intersect(
 /// };
 /// 
 
-////////////////////////////////////////////////////////////////
-/// Bvh building example
-////////////////////////////////////////////////////////////////
-
+/// Build Bvh with SAH:
+/// 
 /// template <class BoundT, class BoxT, class Iter>
-/// void build_bvh_with_SAH_method(
+/// void build_bvh(
 ///   Bvh<BoxT> &bvh,
 ///   const BoundT &bound,
-///   Iter begin,
-///   Iter end)
+///   Iter begin, Iter end)
 /// {
 ///   SAHSplit<BoundT, BoxT, Iter> split(bound);
 ///   bvh.build(bound, split, begin, end);
