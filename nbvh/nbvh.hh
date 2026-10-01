@@ -354,7 +354,7 @@ inline DistanceT nearest(
   struct SE { typename BvhT::index_type i; DistanceT d; };
   std::stack<SE> se({SE { 0, func(nodes.front().b) }});
 
-  while (!si.empty())
+  while (!se.empty())
   {
     const auto entry = se.top(); se.pop();
     const auto &node = nodes[entry.i];
