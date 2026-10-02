@@ -1,7 +1,7 @@
 # NBVH
 ![CMake](https://github.com/IngInx747/nbvh/actions/workflows/.github/workflows/cmake.yml/badge.svg)
 
-`NBVH` is a short of N-dimensional Bounding Volume Hierarchy.
+A header-only library of N-dimensional Bounding Volume Hierarchy.
 
 ## Setup BVH
 
@@ -31,10 +31,10 @@ struct Bound
 };
 ```
 
-Assign a splitting method with BVH. There are 3 built-in methods(Middle-point, Equal counts and SAH).
+Assign a splitting method with your data. There are 3 built-in methods(Middle-point, Equal counts and SAH).
 
 ```cpp
-Bound bound(/* some initializations */);
+Bound bound(/* initializations */);
 SAHSplit<Bound, Box, Iter> split(bound);
 ```
 
@@ -53,7 +53,9 @@ If memory is limited or building time is constrained, use a coarser setting:
 bvh.build(bound, split, data.begin(), data.begin(), data.end(), 100);
 ```
 
-## Spatial query
+Note: The data is reordered after building BVH. If the order matters, consider using indices.
+
+## Range query
 
 Setup your predicate:
 
@@ -73,11 +75,40 @@ struct Predicate
 Query primitives by the predicate:
 
 ```cpp
-Predicate pred(/* some initializations */);
+Predicate pred(/* initializations */);
 
 if (query(bvh, pred, data.begin()))
 { /* do something */ }
 ```
+
+## Nearest primitive
+
+Setup your distance functor:
+
+```cpp
+struct Distance
+{
+  bool operator() (const Box&)
+  { /* distance to a box */ }
+
+  bool operator() (const Primitive&)
+  { /* distance to a primitive */ }
+
+  /* you would like to store the results here */
+};
+```
+
+Search for the nearest primitive:
+
+```cpp
+Distance func(/* initializations */);
+
+nearest(bvh, func, max_dist, data.begin());
+
+/* minimum distance, nearest primitive, etc. */
+```
+
+Bound your search by an estimated maximum distance.
 
 ## Ray-trace
 
@@ -88,23 +119,26 @@ using Vec3 = VectorN<T, 3>;
 
 struct Collide
 {
-  bool operator() (const Box&, const Vec3 &org, const Vec3 &dir, T &dist)
+  bool operator() (const Box&)
   { /* do ray-box collision test */ }
 
-  bool operator() (const Primitive&, const Vec3 &org, const Vec3 &dir, T &dist)
+  bool operator() (const Primitive&)
   { /* do ray-primitive collision test */ }
 
-  /* you would like to store the results here */
+  Vec3 org, dir; // origin and direction
+  T dist = +inf; // ray hitting distance
+
+  /* to add more data for your good */
 };
 ```
 
-Trace the ray thru your scene:
+Trace the ray thru your dataset:
 
 ```cpp
-Collide collide(/* some initializations */);
-Vec3 org, dir;
-T dist = +inf;
+Collide collide(/* initializations */);
 
-if (intersect(bvh, collide, org, dir, dist, data.begin()))
+if (intersect(bvh, collide, dir, data.begin()))
 { /* do something */ }
 ```
+
+The ray direction is passed to the search for branch pruning.
