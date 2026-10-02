@@ -46,13 +46,6 @@ std::vector<Primitive> data(/* populated */);
 bvh.build(bound, split, data.begin(), data.end());
 ```
 
-If memory is limited or building time is constrained, use a coarser setting:
-
-```cpp
-// stop splitting if #primitives per node is less than the threshold
-bvh.build(bound, split, data.begin(), data.begin(), data.end(), 100);
-```
-
 Note: The data is reordered after building BVH. If the order matters, consider using indices.
 
 ## Range query
