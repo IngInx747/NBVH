@@ -342,16 +342,14 @@ inline bool query(
 }
 
 template <class BvhT, class DistFuncT, typename DistanceT, class Iter>
-inline DistanceT nearest(
+inline bool nearest(
   const BvhT &bvh,
   DistFuncT &func,
   DistanceT mind,
   const Iter &base)
 {
-  constexpr auto kInf = std::numeric_limits<DistanceT>::max();
-
   const auto &nodes = bvh.nodes();
-  if (nodes.empty()) return kInf;
+  if (nodes.empty()) return false;
 
   bool hit {};
   struct SE { typename BvhT::index_type i; DistanceT d; };
@@ -394,7 +392,7 @@ inline DistanceT nearest(
     }
   }
 
-  return hit ? mind : kInf;
+  return hit;
 }
 
 template <class BvhT, class CollideT, class VecT, class Iter>

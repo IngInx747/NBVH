@@ -96,9 +96,8 @@ Search for the nearest primitive:
 ```cpp
 Distance func(/* initializations */);
 
-nearest(bvh, func, max_dist, data.begin());
-
-/* minimum distance, nearest primitive, etc. */
+if (nearest(bvh, func, max_dist, data.begin()))
+{ /* minimum distance, nearest primitive, etc. */ }
 ```
 
 Bound your search by an estimated maximum distance.
