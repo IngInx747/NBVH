@@ -77,16 +77,14 @@ template <typename T, size_t N>
 inline bool intersecting(const Aabb<T, N> &b0, const Aabb<T, N> &b1, bool)
 { return b0[0] < b1[1] && b1[0] < b0[1]; }
 
-// * If we can rely on the IEEE 754 floating-point properties,
-// this also implicitly handles the edge case where a component
-// of the direction is zero - the tx0 and tx1 values (for example)
-// will be infinities of opposite sign if the ray is within the slabs,
-// thus leaving t0 and t1 unchanged.
-// If the ray is outside the slabs, tx0 and tx1 will be infinities
-// with the same sign, thus making t0 == +inf or t1 == -inf,
-// and causing the test to fail.
-// * As AABB is not the entity in space, its intersect test does not
-// update distance.
+// We can rely on the IEEE 754 floating-point properties which also implicitly
+//   handles the corner case where a component of the direction is zero - the
+//   tx0 and tx1 values will be infinities of opposite signs if the ray is in
+//   the slabs and leave t0 and t1 unchanged.
+// If the ray is out of the slabs, tx0 and tx1 will be infinities of the same
+//   sign, turning t0 to +inf or t1 to -inf and fails the intersection test.
+// AABB is not an entity in the space, hence the distance does not need to be
+//   updated in an intersection test between an AABB and a ray.
 
 template <typename T, size_t N>
 inline bool intersecting(
