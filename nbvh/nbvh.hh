@@ -397,13 +397,11 @@ inline DistanceT nearest(
   return hit ? mind : kInf;
 }
 
-template <class BvhT, class CollideT, class VecT, typename DistanceT, class Iter>
+template <class BvhT, class CollideT, class VecT, class Iter>
 inline bool intersect(
   const BvhT &bvh,
   CollideT &colli,
-  const VecT &org,
   const VecT &dir,
-  DistanceT &dist,
   const Iter &base)
 {
   const auto &nodes = bvh.nodes();
@@ -417,14 +415,14 @@ inline bool intersect(
     const auto curr = si.top(); si.pop();
     const auto &node = nodes[curr];
 
-    if (colli(node.b, org, dir, dist))
+    if (colli(node.b))
     {
       if (node.leaf())
       {
         const auto ib = node.offset();
         const auto ie = ib + node.length();
         for (auto i = ib; i < ie; ++i)
-          if (colli(*(base + i), org, dir, dist))
+          if (colli(*(base + i)))
             hit = true;
       }
       else
@@ -475,15 +473,8 @@ inline bool intersect(
 /// 
 /// struct Collide
 /// {
-///   bool operator() (const Box &,
-///                    const Vec &org,
-///                    const Vec &dir,
-///                    Distance &dist);
-///
-///   bool operator() (const Value &,
-///                    const Vec &org,
-///                    const Vec &dir,
-///                    Distance &dist);
+///   bool operator() (const Box &);
+///   bool operator() (const Value &);
 ///   ...
 /// };
 /// 
