@@ -101,7 +101,7 @@ inline void Bvh<BoxT, IndexT>::build(
 
   struct SE { Iter begin, end; IndexT id; };
   std::stack<SE> se({SE { base, _end, 0 }});
-  nodes_.emplace_back();
+  nodes_.assign(1, Node {});
 
   while (!se.empty())
   {
