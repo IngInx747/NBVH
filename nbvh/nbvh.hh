@@ -203,7 +203,7 @@ inline Iter MiddlePointSplit<BoundT, BoxT, Iter>::operator()(const Iter &begin, 
   const auto axis = longest_axis(bc);
   const auto mv = centroid(bc)[axis];
 
-  const auto pivot = std::partition(begin, end, [&](const auto &val)
+  auto pivot = std::partition(begin, end, [&](const auto &val)
   { return centroid(bound_(val))[axis] < mv; });
 
   if (pivot == begin || pivot == end) // fallback to EqualCount
