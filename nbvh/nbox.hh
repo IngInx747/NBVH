@@ -26,12 +26,36 @@ template <typename T, size_t N> struct Aabb
 ////////////////////////////////////////////////////////////////
 
 template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool operator<(const VectorN<T, N> &a, const VectorN<T, N> &b)
-{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x < y; }, true, Indices{}); }
+inline bool all_positive(const VectorN<T, N> &v)
+{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r && x > 0; }, true, Indices{}); }
 
 template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool operator<=(const VectorN<T, N> &a, const VectorN<T, N> &b)
-{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x <= y; }, true, Indices{}); }
+inline bool all_negative(const VectorN<T, N> &v)
+{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r && x < 0; }, true, Indices{}); }
+
+template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+inline bool non_positive(const VectorN<T, N> &v)
+{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r && x <= 0; }, true, Indices{}); }
+
+template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+inline bool non_negative(const VectorN<T, N> &v)
+{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r && x >= 0; }, true, Indices{}); }
+
+template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+inline bool any_positive(const VectorN<T, N> &v)
+{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r || x > 0; }, false, Indices{}); }
+
+template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+inline bool any_negative(const VectorN<T, N> &v)
+{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r || x < 0; }, false, Indices{}); }
+
+//template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+//inline bool operator<(const VectorN<T, N> &a, const VectorN<T, N> &b)
+//{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x < y; }, true, Indices{}); }
+
+//template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+//inline bool operator<=(const VectorN<T, N> &a, const VectorN<T, N> &b)
+//{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x <= y; }, true, Indices{}); }
 
 template <typename T, size_t N, typename... R>
 inline VectorN<T, N> max(const VectorN<T, N> &a, const VectorN<T, N> &b, const VectorN<R, N> &... rest)
@@ -47,35 +71,35 @@ inline VectorN<T, N> min(const VectorN<T, N> &a, const VectorN<T, N> &b, const V
 
 template <typename T, size_t N>
 inline bool valid(const Aabb<T, N> &b)
-{ return b[0] <= b[1]; }
+{ return non_positive(b[0] - b[1]); }
 
 template <typename T, size_t N>
 inline bool valid(const Aabb<T, N> &b, bool)
-{ return b[0] < b[1]; }
+{ return all_negative(b[0] - b[1]); }
 
 template <typename T, size_t N>
 inline bool inside(const Aabb<T, N> &b, const VectorN<T, N> &v)
-{ return b[0] <= v && v <= b[1]; }
+{ return non_positive(b[0] - v) && non_positive(v - b[1]); }
 
 template <typename T, size_t N>
 inline bool inside(const Aabb<T, N> &b, const VectorN<T, N> &v, bool)
-{ return b[0] < v && v < b[1]; }
+{ return all_negative(b[0] - v) && all_negative(v - b[1]); }
 
 template <typename T, size_t N>
 inline bool inside(const Aabb<T, N> &B, const Aabb<T, N> &b)
-{ return B[0] <= b[0] && b[1] <= B[1]; }
+{ return non_positive(B[0] - b[0]) && non_positive(b[1] - B[1]); }
 
 template <typename T, size_t N>
 inline bool inside(const Aabb<T, N> &B, const Aabb<T, N> &b, bool)
-{ return B[0] < b[0] && b[1] < B[1]; }
+{ return all_negative(B[0] - b[0]) && all_negative(b[1] - B[1]); }
 
 template <typename T, size_t N>
 inline bool intersecting(const Aabb<T, N> &b0, const Aabb<T, N> &b1)
-{ return b0[0] <= b1[1] && b1[0] <= b0[1]; }
+{ return non_positive(b0[0] - b1[1]) && non_positive(b1[0] - b0[1]); }
 
 template <typename T, size_t N>
 inline bool intersecting(const Aabb<T, N> &b0, const Aabb<T, N> &b1, bool)
-{ return b0[0] < b1[1] && b1[0] < b0[1]; }
+{ return all_negative(b0[0] - b1[1]) && all_negative(b1[0] - b0[1]); }
 
 // We can rely on the IEEE 754 floating-point properties which also implicitly
 //   handles the corner case where a component of the direction is zero - the
