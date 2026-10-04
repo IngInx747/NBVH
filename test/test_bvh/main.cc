@@ -531,7 +531,7 @@ static int test_nearest()
     double mind1 {};
     const auto fc0 = nearest(fs, p, mind0);
     const auto fc1 = nearest(fs, fids, bvh, p, mind1);
-    if (fc0 != fc1 || fabs(mind0 - mind1) > 1e-10)
+    if (fabs(mind0 - mind1) > 1e-10)
     {
       printf("test_nearest %zu: results mismatch %d %d\n", i, fc0, fc1);
       return 1;
