@@ -5,10 +5,7 @@
 #define ENABLED_CPP_STD_17
 #endif
 
-#ifndef _WIN64
 #include <cstddef>
-#endif
-
 #include <utility> // std::index_sequence
 #include <array>
 #include <cmath>
@@ -18,10 +15,8 @@
 /// ND vector
 ////////////////////////////////////////////////////////////////
 
-template <typename T, size_t N> class VectorN
+template <typename T, size_t N> struct VectorN
 {
-public:
-
   typedef T value_type;
 
   constexpr VectorN(): v_() {}

@@ -237,8 +237,8 @@ inline Iter SAHSplit<BoundT, BoxT, Iter>::operator()(const Iter &begin, const It
   for (auto it = begin + 1; it != end; ++it)
     bc |= bound_(*it);
 
-  // degenerated bbox, stop splitting
-  if (!valid(bc, bool {})) return begin;
+  // zero-volume bounding box, stop splitting
+  if (!any_positive(bc[1] - bc[0])) return begin;
 
   const auto axis = longest_axis(bc);
   const auto inv = 1/diagonal(bc)[axis];
