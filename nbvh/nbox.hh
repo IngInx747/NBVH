@@ -25,6 +25,18 @@ template <typename T, size_t N> struct Aabb
 /// AABB impl utilities
 ////////////////////////////////////////////////////////////////
 
+template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+inline bool all_less(const VectorN<T, N> &a, const VectorN<T, N> &b)
+{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x < y; }, true, Indices{}); }
+
+template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+inline bool all_leq(const VectorN<T, N> &a, const VectorN<T, N> &b)
+{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x <= y; }, true, Indices{}); }
+
+template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+inline bool any_less(const VectorN<T, N> &a, const VectorN<T, N> &b)
+{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r || x < y; }, false, Indices{}); }
+
 template <typename T, size_t N, typename... R>
 inline VectorN<T, N> max(const VectorN<T, N> &a, const VectorN<T, N> &b, const VectorN<R, N> &... rest)
 { return max(max(a, b), rest...); }
@@ -33,73 +45,45 @@ template <typename T, size_t N, typename... R>
 inline VectorN<T, N> min(const VectorN<T, N> &a, const VectorN<T, N> &b, const VectorN<R, N> &... rest)
 { return min(min(a, b), rest...); }
 
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool less(const VectorN<T, N> &a, const VectorN<T, N> &b)
-{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x < y; }, true, Indices{}); }
-
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool lesseq(const VectorN<T, N> &a, const VectorN<T, N> &b)
-{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x <= y; }, true, Indices{}); }
-
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool all_positive(const VectorN<T, N> &v)
-{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r && x > 0; }, true, Indices{}); }
-
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool all_negative(const VectorN<T, N> &v)
-{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r && x < 0; }, true, Indices{}); }
-
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool non_positive(const VectorN<T, N> &v)
-{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r && x <= 0; }, true, Indices{}); }
-
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool non_negative(const VectorN<T, N> &v)
-{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r && x >= 0; }, true, Indices{}); }
-
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool any_positive(const VectorN<T, N> &v)
-{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r || x > 0; }, false, Indices{}); }
-
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool any_negative(const VectorN<T, N> &v)
-{ return op_impl_rdc<T, N, bool>(v, [] (bool r, T x) { return r || x < 0; }, false, Indices{}); }
-
 ////////////////////////////////////////////////////////////////
 /// AABB boolean impls
 ////////////////////////////////////////////////////////////////
 
 template <typename T, size_t N>
 inline bool valid(const Aabb<T, N> &b)
-{ return lesseq(b[0], b[1]); }
+{ return all_leq(b[0], b[1]); }
 
 template <typename T, size_t N>
-inline bool valid(const Aabb<T, N> &b, bool)
-{ return less(b[0], b[1]); }
+inline bool alldim(const Aabb<T, N> &b) // all dimensions are positive
+{ return all_less(b[0], b[1]); }
+
+template <typename T, size_t N>
+inline bool anydim(const Aabb<T, N> &b) // any dimension is positive
+{ return any_less(b[0], b[1]); }
 
 template <typename T, size_t N>
 inline bool inside(const Aabb<T, N> &b, const VectorN<T, N> &v)
-{ return lesseq(b[0], v) && lesseq(v, b[1]); }
+{ return all_leq(b[0], v) && all_leq(v, b[1]); }
 
 template <typename T, size_t N>
 inline bool inside(const Aabb<T, N> &b, const VectorN<T, N> &v, bool)
-{ return less(b[0], v) && less(v, b[1]); }
+{ return all_less(b[0], v) && all_less(v, b[1]); }
 
 template <typename T, size_t N>
 inline bool inside(const Aabb<T, N> &B, const Aabb<T, N> &b)
-{ return lesseq(B[0], b[0]) && lesseq(b[1], B[1]); }
+{ return all_leq(B[0], b[0]) && all_leq(b[1], B[1]); }
 
 template <typename T, size_t N>
 inline bool inside(const Aabb<T, N> &B, const Aabb<T, N> &b, bool)
-{ return less(B[0], b[0]) && less(b[1], B[1]); }
+{ return all_less(B[0], b[0]) && all_less(b[1], B[1]); }
 
 template <typename T, size_t N>
 inline bool intersecting(const Aabb<T, N> &b0, const Aabb<T, N> &b1)
-{ return lesseq(b0[0], b1[1]) && lesseq(b1[0], b0[1]); }
+{ return all_leq(b0[0], b1[1]) && all_leq(b1[0], b0[1]); }
 
 template <typename T, size_t N>
 inline bool intersecting(const Aabb<T, N> &b0, const Aabb<T, N> &b1, bool)
-{ return less(b0[0], b1[1]) && less(b1[0], b0[1]); }
+{ return all_less(b0[0], b1[1]) && all_less(b1[0], b0[1]); }
 
 // We can rely on the IEEE 754 floating-point properties which also implicitly
 //   handles the corner case where a component of the direction is zero - the
@@ -151,15 +135,15 @@ inline VectorN<T, N> diagonal(const Aabb<T, N> &b)
 { return b[1] - b[0]; }
 
 template <typename T, size_t N>
-inline T component(const Aabb<T, N> &b, size_t dim)
+inline T length(const Aabb<T, N> &b, size_t dim)
 { return diagonal(b)[dim]; }
 
 template <typename T, size_t N>
-inline T max_component(const Aabb<T, N> &b)
+inline T lenmax(const Aabb<T, N> &b)
 { return max(diagonal(b)); }
 
 template <typename T, size_t N>
-inline size_t longest_axis(const Aabb<T, N> &b)
+inline size_t longest(const Aabb<T, N> &b)
 { return argmax(diagonal(b)); }
 
 template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>

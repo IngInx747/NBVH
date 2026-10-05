@@ -38,7 +38,7 @@ int main(int argc, const char **argv)
     std::cout << "valid(bn) = " << valid(bn) << std::endl;
     std::cout << "valid(b0) = " << valid(b0) << std::endl;
     std::cout << "valid(bo) = " << valid(bo) << std::endl;
-    std::cout << "valid(bo) ex = " << valid(bo, true) << std::endl;
+    std::cout << "valid(bo) ex = " << alldim(bo) << std::endl;
     std::cout << "is v0 inside b0 = " << inside(b0, v0) << std::endl;
     std::cout << "is v0 inside b0 ex = " << inside(b0, v0, true) << std::endl;
     std::cout << "is v1 inside b1 = " << inside(b1, v0) << std::endl;
@@ -47,12 +47,12 @@ int main(int argc, const char **argv)
     std::cout << "is b1 inside b0 ex = " << inside(b0, b1, true) << std::endl;
     std::cout << "is b1 intersecting b8 = " << intersecting(b1, b8) << std::endl;
     std::cout << "is b1 intersecting b8 ex = " << intersecting(b1, b8, true) << std::endl;
-    std::cout << "max component (b1,b2) = " << max_component(merge(b1, b2)) << ", axis = " << longest_axis(merge(b1, b2)) << std::endl;
-    std::cout << "max component (b1,b3) = " << max_component(merge(b1, b3)) << ", axis = " << longest_axis(merge(b1, b3)) << std::endl;
-    std::cout << "max component (b1,b4) = " << max_component(merge(b1, b4)) << ", axis = " << longest_axis(merge(b1, b4)) << std::endl;
-    std::cout << "max component (b1,b5) = " << max_component(merge(b1, b5)) << ", axis = " << longest_axis(merge(b1, b5)) << std::endl;
-    std::cout << "max component (b1,b8) = " << max_component(merge(b1, b8)) << ", axis = " << longest_axis(merge(b1, b8)) << std::endl;
-    std::cout << "valid(b1 & b8) = " << valid(intersect(b1, b8)) << ", exclusively = " << valid(intersect(b1, b8), true) << std::endl;
+    std::cout << "max component (b1,b2) = " << lenmax(merge(b1, b2)) << ", axis = " << longest(merge(b1, b2)) << std::endl;
+    std::cout << "max component (b1,b3) = " << lenmax(merge(b1, b3)) << ", axis = " << longest(merge(b1, b3)) << std::endl;
+    std::cout << "max component (b1,b4) = " << lenmax(merge(b1, b4)) << ", axis = " << longest(merge(b1, b4)) << std::endl;
+    std::cout << "max component (b1,b5) = " << lenmax(merge(b1, b5)) << ", axis = " << longest(merge(b1, b5)) << std::endl;
+    std::cout << "max component (b1,b8) = " << lenmax(merge(b1, b8)) << ", axis = " << longest(merge(b1, b8)) << std::endl;
+    std::cout << "valid(b1 & b8) = " << valid(intersect(b1, b8)) << ", exclusively = " << alldim(intersect(b1, b8)) << std::endl;
     //Vec3 d1 = normalize(Vec3 { 1,0,0 });
     //Vec3 d2 = normalize(Vec3 { 1,1,0 });
     //Vec3 d3 = normalize(Vec3 { 1,1,1 });

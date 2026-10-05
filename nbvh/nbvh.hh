@@ -173,7 +173,7 @@ inline Iter EqualCountSplit<BoundT, BoxT, Iter>::operator()(const Iter &begin, c
   for (auto it = begin + 1; it != end; ++it)
     bc |= bound_(*it);
 
-  const auto axis = longest_axis(bc);
+  const auto axis = longest(bc);
   const auto pivot = begin + std::distance(begin, end)/2;
 
   std::nth_element(begin, pivot, end, [&](const auto &a, const auto &b)
@@ -200,7 +200,7 @@ inline Iter MiddlePointSplit<BoundT, BoxT, Iter>::operator()(const Iter &begin, 
   for (auto it = begin + 1; it != end; ++it)
     bc |= bound_(*it);
 
-  const auto axis = longest_axis(bc);
+  const auto axis = longest(bc);
   const auto mv = centroid(bc)[axis];
 
   auto pivot = std::partition(begin, end, [&](const auto &val)
@@ -237,10 +237,10 @@ inline Iter SAHSplit<BoundT, BoxT, Iter>::operator()(const Iter &begin, const It
   for (auto it = begin + 1; it != end; ++it)
     bc |= bound_(*it);
 
-  // zero-volume bounding box, stop splitting
-  if (!any_positive(bc[1] - bc[0])) return begin;
+  // all-zero box, stop splitting
+  if (!anydim(bc)) return begin;
 
-  const auto axis = longest_axis(bc);
+  const auto axis = longest(bc);
   const auto inv = 1/diagonal(bc)[axis];
 
   std::vector<BoxT> bs(bsize_, make_aabb<BoxT>());
@@ -257,7 +257,7 @@ inline Iter SAHSplit<BoundT, BoxT, Iter>::operator()(const Iter &begin, const It
 
   // the cost of splitting buckets into [0, b] and [b+1, :]
   auto minc = std::numeric_limits<decltype(inv)>::max();
-  size_t arcminc = 0; // the bucket id to split
+  size_t argminc = 0; // the bucket id to split
 
   // find bucket id that minimizes SAH metric
   for (size_t k = 0; k < bsize_ - 1; ++k)
@@ -277,7 +277,7 @@ inline Iter SAHSplit<BoundT, BoxT, Iter>::operator()(const Iter &begin, const It
     }
 
     const auto cost = area(b0)*count0 + area(b1)*count1;
-    if (minc > cost) { minc = cost; arcminc = k; }
+    if (minc > cost) { minc = cost; argminc = k; }
   }
 
   // split at the position of minimum cost
@@ -286,7 +286,7 @@ inline Iter SAHSplit<BoundT, BoxT, Iter>::operator()(const Iter &begin, const It
     const auto d = centroid(bound_(val)) - bc[0];
     size_t k = (size_t)(bsize_*(d[axis]*inv));
     if (k >= bsize_) k = bsize_ - 1;
-    return k <= arcminc;
+    return k <= argminc;
   });
 
   if (pivot == begin || pivot == end) // fallback to EqualCount
@@ -425,7 +425,7 @@ inline bool intersect(
       }
       else
       {
-        const auto axis = longest_axis(node.b);
+        const auto axis = longest(node.b);
 
         if (dir[axis] < 0)
         {
