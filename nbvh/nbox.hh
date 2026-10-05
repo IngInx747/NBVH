@@ -25,14 +25,6 @@ template <typename T, size_t N> struct Aabb
 /// AABB impl utilities
 ////////////////////////////////////////////////////////////////
 
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool less(const VectorN<T, N> &a, const VectorN<T, N> &b)
-{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x < y; }, true, Indices{}); }
-
-template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
-inline bool lesseq(const VectorN<T, N> &a, const VectorN<T, N> &b)
-{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x <= y; }, true, Indices{}); }
-
 template <typename T, size_t N, typename... R>
 inline VectorN<T, N> max(const VectorN<T, N> &a, const VectorN<T, N> &b, const VectorN<R, N> &... rest)
 { return max(max(a, b), rest...); }
@@ -40,6 +32,14 @@ inline VectorN<T, N> max(const VectorN<T, N> &a, const VectorN<T, N> &b, const V
 template <typename T, size_t N, typename... R>
 inline VectorN<T, N> min(const VectorN<T, N> &a, const VectorN<T, N> &b, const VectorN<R, N> &... rest)
 { return min(min(a, b), rest...); }
+
+template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+inline bool less(const VectorN<T, N> &a, const VectorN<T, N> &b)
+{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x < y; }, true, Indices{}); }
+
+template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
+inline bool lesseq(const VectorN<T, N> &a, const VectorN<T, N> &b)
+{ return op_impl_dot<T, N, bool>(a, b, [] (bool r, T x, T y) { return r && x <= y; }, true, Indices{}); }
 
 template <typename T, size_t N, typename Indices = std::make_index_sequence<N>>
 inline bool all_positive(const VectorN<T, N> &v)
