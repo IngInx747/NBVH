@@ -129,7 +129,7 @@ Trace the ray thru your dataset:
 ```cpp
 Collide collide(/* initializations */);
 
-if (intersect(bvh, collide, dir, data.begin()))
+if (trace(bvh, collide, dir, data.begin()))
 { /* do something */ }
 ```
 

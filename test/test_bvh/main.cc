@@ -281,7 +281,7 @@ static int trace(
   const Vec3 &dir)
 {
   TriangleCollide collide(fs, org, dir);
-  intersect(bvh, collide, dir, fids.begin());
+  trace(bvh, collide, dir, fids.begin());
   return collide.fc;
 }
 

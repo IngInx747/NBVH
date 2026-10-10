@@ -396,7 +396,7 @@ inline bool nearest(
 }
 
 template <class BvhT, class CollideT, class VecT, class Iter>
-inline bool intersect(
+inline bool trace(
   const BvhT &bvh,
   CollideT &colli,
   const VecT &dir,
