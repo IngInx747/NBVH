@@ -99,16 +99,24 @@ inline void Bvh<BoxT, IndexT>::build(
 {
   if (base == _end) return;
 
-  struct SE { Iter begin, end; IndexT id; };
-  std::stack<SE> se({SE { base, _end, 0 }});
-  nodes_.assign(1, Node {});
+  const auto n = std::distance(base, _end);
+  nodes_.clear(); nodes_.reserve(n*2 - 1);
+
+  struct SE { Iter begin, end; IndexT parent; };
+  std::stack<SE> se ({ SE { base, _end, -1 } });
 
   while (!se.empty())
   {
     const auto entry = se.top(); se.pop();
     const auto &begin = entry.begin;
     const auto &end = entry.end;
-    auto &node = nodes_[entry.id];
+
+    // allocate a new node
+    const auto id = (IndexT)nodes_.size();
+    nodes_.emplace_back();
+    auto &node = nodes_.back();
+    if (entry.parent >= 0)
+      nodes_[entry.parent].right() = id;
 
     // split current set into two subsets
     const auto len = (IndexT)std::distance(begin, end);
@@ -129,14 +137,9 @@ inline void Bvh<BoxT, IndexT>::build(
     }
     else // the node is inner
     {
-      const auto left = (IndexT)nodes_.size();
-      const auto right = left + 1;
-      node.left()  = left;
-      node.right() = right;
-      nodes_.emplace_back();
-      nodes_.emplace_back();
-      se.push({ pivot, end,  right });
-      se.push({ begin, pivot, left });
+      node.left() = id + 1;
+      se.push({ pivot, end, id });
+      se.push({ begin, pivot, -1 });
     }
   }
 
@@ -149,6 +152,9 @@ inline void Bvh<BoxT, IndexT>::build(
     auto &node = nodes_[i]; if (node.leaf()) continue;
     node.b = nodes_[node.left()].b | nodes_[node.right()].b;
   }
+
+  if (nodes_.capacity() > nodes_.size()*2)
+    nodes_.shrink_to_fit();
 }
 
 ////////////////////////////////////////////////////////////////
