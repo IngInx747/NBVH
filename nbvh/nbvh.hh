@@ -76,11 +76,14 @@ public:
 
 public:
 
-  inline bool empty() const
-  { return nodes_.empty(); }
-
   inline const auto &nodes() const
   { return nodes_; }
+
+  inline auto &nodes()
+  { return nodes_; }
+
+  inline bool empty() const
+  { return nodes_.empty(); }
 
   inline void clear()
   { nodes_.clear(); }
