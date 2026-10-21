@@ -27,6 +27,7 @@
 #include <stack>
 #include <vector>
 #include <algorithm>
+#include <type_traits>
 #include "nbox.hh"
 
 ////////////////////////////////////////////////////////////////
@@ -38,6 +39,11 @@ template <class BoxT, typename IndexT = int> class Bvh
 public:
 
   typedef IndexT index_type;
+
+  static_assert(
+    std::is_signed<IndexT>::value &&
+    std::is_integral<IndexT>::value,
+    "Index must be signed integer");
 
 public:
 
