@@ -19,7 +19,7 @@ using Box = Aabb<T, N>;
 using Bvh = Bvh<Box>;
 ```
 
-Tell BVH how to create the bounding box per primitive:
+Define the bounding box per primitive:
 
 ```cpp
 struct Bound
