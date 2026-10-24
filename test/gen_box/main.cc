@@ -99,9 +99,10 @@ static int save_obj(
 
   for (size_t i = 0; i < nf; ++i)
     out << "f "
-        << fs[i*3 + 0] + 1 << " "
-        << fs[i*3 + 1] + 1 << " "
-        << fs[i*3 + 2] + 1 << " "
+        << fs[i*4 + 0] + 1 << " "
+        << fs[i*4 + 1] + 1 << " "
+        << fs[i*4 + 2] + 1 << " "
+        << fs[i*4 + 3] + 1 << " "
         << "\n";
 
   for (size_t i = 0; i < ne; ++i)
@@ -113,94 +114,46 @@ static int save_obj(
     return 0;
 }
 
-static int save_msh(
-  const double *vs, const size_t nv,
-  const int    *fs, const size_t nf,
-  const int    *es, const size_t ne,
-  const char *filename,
-  const std::streamsize prec = 17)
-{
-  std::ofstream out(filename, std::ios::out);
-  if (!out) return out.bad();
-
-  out << std::defaultfloat << std::setprecision(prec);
-
-  out << "MeshVersionFormatted 1\n\nDimension\n3\n\n";
-
-  out << "Vertices\n" << nv << "\n";
-
-  for (size_t i = 0; i < nv; ++i)
-    out << vs[i*3 + 0] << " "
-        << vs[i*3 + 1] << " "
-        << vs[i*3 + 2] << " "
-        << " -1\n";
-
-  out << "Triangles\n" << nf << "\n";
-
-  for (size_t i = 0; i < nf; ++i)
-    out << fs[i*3 + 0] + 1 << " "
-        << fs[i*3 + 1] + 1 << " "
-        << fs[i*3 + 2] + 1 << " "
-        << " 1\n";
-
-  out << "Edges\n" << ne << "\n";
-
-  for (size_t i = 0; i < ne; ++i)
-    out << es[i*2 + 0] + 1 << " "
-        << es[i*2 + 1] + 1 << " "
-        << " -1\n";
-
-  out << "End\n";
-
-  return 0;
-}
-
 static void append(
-  std::vector<Vec3> &vs,
-  std::vector<Int3> &fs,
-  std::vector<Int2> &es,
+  std::vector<double> &vs,
+  std::vector<int> &fs,
+  std::vector<int> &es,
   const Box3 &box)
 {
-  const auto nv = vs.size();
+  const auto nv = vs.size()/3;
   const auto nf = fs.size();
   const auto ne = es.size();
   const auto &v0 = box[0];
   const auto &v1 = box[1];
 
-  vs.push_back({ v0[0], v0[1], v0[2] });
-  vs.push_back({ v1[0], v0[1], v0[2] });
-  vs.push_back({ v0[0], v1[1], v0[2] });
-  vs.push_back({ v1[0], v1[1], v0[2] });
-  vs.push_back({ v0[0], v0[1], v1[2] });
-  vs.push_back({ v1[0], v0[1], v1[2] });
-  vs.push_back({ v0[0], v1[1], v1[2] });
-  vs.push_back({ v1[0], v1[1], v1[2] });
+  vs.insert(vs.end(), { v0[0], v0[1], v0[2] });
+  vs.insert(vs.end(), { v1[0], v0[1], v0[2] });
+  vs.insert(vs.end(), { v0[0], v1[1], v0[2] });
+  vs.insert(vs.end(), { v1[0], v1[1], v0[2] });
+  vs.insert(vs.end(), { v0[0], v0[1], v1[2] });
+  vs.insert(vs.end(), { v1[0], v0[1], v1[2] });
+  vs.insert(vs.end(), { v0[0], v1[1], v1[2] });
+  vs.insert(vs.end(), { v1[0], v1[1], v1[2] });
 
-  fs.push_back({ 0, 2, 3 });
-  fs.push_back({ 3, 1, 0 });
-  fs.push_back({ 4, 5, 7 });
-  fs.push_back({ 7, 6, 4 });
-  fs.push_back({ 0, 4, 6 });
-  fs.push_back({ 6, 2, 0 });
-  fs.push_back({ 1, 3, 7 });
-  fs.push_back({ 7, 5, 1 });
-  fs.push_back({ 3, 2, 6 });
-  fs.push_back({ 6, 7, 3 });
-  fs.push_back({ 1, 5, 4 });
-  fs.push_back({ 4, 0, 1 });
+  fs.insert(fs.end(), { 0, 2, 3, 1 });
+  fs.insert(fs.end(), { 4, 5, 7, 6 });
+  fs.insert(fs.end(), { 0, 4, 6, 2 });
+  fs.insert(fs.end(), { 1, 3, 7, 5 });
+  fs.insert(fs.end(), { 3, 2, 6, 7 });
+  fs.insert(fs.end(), { 1, 5, 4, 0 });
 
-  es.push_back({ 0, 1 });
-  es.push_back({ 2, 3 });
-  es.push_back({ 4, 5 });
-  es.push_back({ 6, 7 });
-  es.push_back({ 0, 2 });
-  es.push_back({ 1, 3 });
-  es.push_back({ 4, 6 });
-  es.push_back({ 5, 7 });
-  es.push_back({ 0, 4 });
-  es.push_back({ 1, 5 });
-  es.push_back({ 2, 6 });
-  es.push_back({ 3, 7 });
+  es.insert(es.end(), { 0, 1 });
+  es.insert(es.end(), { 2, 3 });
+  es.insert(es.end(), { 4, 5 });
+  es.insert(es.end(), { 6, 7 });
+  es.insert(es.end(), { 0, 2 });
+  es.insert(es.end(), { 1, 3 });
+  es.insert(es.end(), { 4, 6 });
+  es.insert(es.end(), { 5, 7 });
+  es.insert(es.end(), { 0, 4 });
+  es.insert(es.end(), { 1, 5 });
+  es.insert(es.end(), { 2, 6 });
+  es.insert(es.end(), { 3, 7 });
 
   for (size_t i = nf; i < fs.size(); ++i)
     fs[i] += (int)nv;
@@ -232,23 +185,17 @@ int main(int argc, const char **argv)
   SAHSplit<TriangleBound, Box3, decltype(fids.end())> split(bound);
   bvh.build(bound, split, fids.begin(), fids.end());
 
-  std::vector<Vec3> vo {};
-  std::vector<Int3> fo {};
-  std::vector<Int2> eo {};
+  std::vector<double> vo {};
+  std::vector<int> fo {};
+  std::vector<int> eo {};
   for (const auto &node : bvh.nodes())
     append(vo, fo, eo, node.b);
 
   err = save_obj(
-    (const double*)vo.data(), vo.size(),
-    (const int*)   fo.data(), fo.size(),
-    (const int*)   eo.data(), eo.size(),
+    vo.data(), vo.size()/3,
+    fo.data(), fo.size()/4,
+    eo.data(), eo.size()/2,
     (prefix + ".bvh.obj").c_str());
-
-  //err = save_msh(
-  //  (const double*)vo.data(), vo.size(),
-  //  (const int*)   fo.data(), fo.size(),
-  //  (const int*)   eo.data(), eo.size(),
-  //  (prefix + ".bvh.mesh").c_str());
 
   return 0;
 }
